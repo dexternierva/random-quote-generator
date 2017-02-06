@@ -54,7 +54,6 @@ var quotes = [
 
 // Select a random quote object from the quotes Array
 function getRandomQuote() {
-	var
 	var quotesLength = quotes.length;
 	var quoteIndex = Math.floor( Math.random() * quotesLength );
 
