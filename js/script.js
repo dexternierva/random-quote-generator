@@ -1,7 +1,3 @@
-// event listener to respond to "Show another quote" button clicks
-// when user clicks anywhere on the button, the "printQuote" function is called
-document.getElementById('loadQuote').addEventListener("click", printQuote, false);
-
 // Array of objects to hold quotes.
 var quotes = [
 	{
@@ -52,39 +48,51 @@ var quotes = [
 	}
 ];
 
-// Select a random quote object from the quotes Array
-function getRandomQuote() {
-	var quotesLength = quotes.length;
-	var quoteIndex = Math.floor( Math.random() * quotesLength );
-
-	return quotes[quoteIndex];
+// Map through quotes to get an array containing index of each quote
+function map(arr, fn) {
+	let idx = -1,
+		len = arr.length,
+		result = new Array(len);
+	while (++idx < len) { result[idx] = fn(arr[idx], idx, arr); }
+	return result;
 }
 
-// Function that builds and displays the string
-function printQuote () {
-	var randomQuote = getRandomQuote();
+var quoteIdx = map(quotes, (item, idx) => idx);
 
-	// Construct string
-	var HTML = '<p class="quote">' + randomQuote.quote + '</p>';
-		HTML += '<p class="source">' + randomQuote.source;
+// Generate a random number between 0 and length of the quotes array
+var random = function (arr) {
+	var idx = Math.floor( Math.random() * arr.length );
+	return idx;
+}
+
+// Get random index
+var getIdx = function (quoteIdx, quotes) {
+	if (quoteIdx.length === 0) {
+		quoteIdx = map(quotes, (item, idx) => idx);
+	}
+	var randomNum = random(quoteIdx);
+	var idx = quoteIdx.splice(randomNum, 1)[0];
+	return idx;
+}
+
+// Construct Element
+function constructEl (randomQuote) {
+	var html = '<p class="quote">' + randomQuote.quote + '</p>';
+		html += '<p class="source">' + randomQuote.source;
 
 		// Check if "citation" exists
 		if ( randomQuote.citation ) {
-			HTML += '<span class="citation">' + randomQuote.citation + '</span>';
+			html += '<span class="citation">' + randomQuote.citation + '</span>';
 		}
 
 		// Check if "year" exists
 		if ( randomQuote.year ) {
-			HTML += '<span class="year">' + randomQuote.year + '</span>';
+			html += '<span class="year">' + randomQuote.year + '</span>';
 		}
 
-		HTML += '</p>';
+		html += '</p>';
 
-	// Display final HTML string
-	document.getElementById( 'quote-box' ).innerHTML = HTML;
-
-	// Change Background Color
-	changeBackground();
+	return html;
 }
 
 // Function to Generate a Random Color
@@ -93,3 +101,17 @@ function changeBackground() {
 	var hue = 'rgb(' + randomNumber() + ', ' + randomNumber() + ', ' + randomNumber() + ')';
 	document.body.style.backgroundColor = hue;
 }
+
+// Run when "show another quote" button is clicked
+function init() {
+	var idx = getIdx(quoteIdx, quotes);
+	var el = document.querySelector('#quote-box');
+
+	el.innerHTML = constructEl(quotes[idx]);
+	// Change Background Color
+	changeBackground();
+}
+
+// event listener to respond to "Show another quote" button clicks
+// when user clicks anywhere on the button, the "printQuote" function is called
+document.getElementById('loadQuote').addEventListener("click", init, false);
